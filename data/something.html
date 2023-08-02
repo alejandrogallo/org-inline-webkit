@@ -1,0 +1,24 @@
+
+<html>
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/p5.js"></script>
+  <script>
+    function setup() {
+  createCanvas(500, 200, WEBGL);
+}
+function draw() {
+  background(255);
+  push();
+  normalMaterial();
+  rotateZ(frameCount * 0.01);
+  rotateX(frameCount * 0.01);
+  rotateY(frameCount * 0.01);
+  box(100, sin(0.01*frameCount)*70, cos(0.05*frameCount)*70);
+  pop();
+}
+  </script>
+</head>
+<body>
+  <center><main></main></center>
+</body>
+</html>
