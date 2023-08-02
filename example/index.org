@@ -1,0 +1,262 @@
+#+ORG_INLINE_WEBKIT_EXPORT_IFRAME: t
+
+* Plotly
+
+** Slide and animation
+
+There is a short animation in the beginning and then you
+can manipulate the slider in both =org-mode= and html.
+
+#+begin_src python :exports results :results file link
+import plotly.express as px
+
+df = px.data.gapminder()
+fig = px.scatter(df, x="gdpPercap", y="lifeExp", animation_frame="year", animation_group="country",
+           size="pop", color="continent", hover_name="country",
+           log_x=True, size_max=55, range_x=[100,100000], range_y=[25,90])
+
+fig["layout"].pop("updatemenus") # optional, drop animation buttons
+fig.write_html("data/plotly3.html")
+return "data/plotly3.html"
+#+end_src
+
+#+attr_org: :width 800 :height 600
+#+RESULTS:
+[[file:data/plotly3.html]]
+
+** Some 3D
+
+You can interact with this 3D plot both in =org-mode= and in the exported html.
+
+#+begin_src python :exports results :results file link
+import plotly.graph_objects as go
+import pandas as pd
+
+# Read data from a csv
+z_data = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/api_docs/mt_bruno_elevation.csv')
+
+fig = go.Figure(data=go.Surface(z=z_data, showscale=False))
+fig.update_layout(
+    title='Mt Bruno Elevation',
+    width=400, height=400,
+    margin=dict(t=40, r=0, l=20, b=20)
+)
+
+fig.write_html("data/plotly1.html")
+return "data/plotly1.html"
+#+end_src
+
+#+attr_org: :width 800 :height 450
+#+RESULTS:
+[[file:data/plotly1.html]]
+
+** Another slider
+
+Just some other example.
+
+#+begin_src python :exports results :results file link
+import plotly.graph_objects as go
+import numpy as np
+
+# Create figure
+fig = go.Figure()
+
+# Add traces, one for each slider step
+for step in np.arange(0, 5, 0.1):
+    fig.add_trace(
+        go.Scatter(
+            visible=False,
+            line=dict(color="#00CED1", width=6),
+            name="𝜈 = " + str(step),
+            x=np.arange(0, 10, 0.01),
+            y=np.sin(step * np.arange(0, 10, 0.01))))
+
+# Make 10th trace visible
+fig.data[10].visible = True
+
+# Create and add slider
+steps = []
+for i in range(len(fig.data)):
+    step = dict(
+        method="update",
+        args=[{"visible": [False] * len(fig.data)},
+              {"title": "Slider switched to step: " + str(i)}],  # layout attribute
+    )
+    step["args"][0]["visible"][i] = True  # Toggle i'th trace to "visible"
+    steps.append(step)
+
+sliders = [dict(
+    active=10,
+    currentvalue={"prefix": "Frequency: "},
+    pad={"t": 50},
+    steps=steps
+)]
+
+fig.update_layout(
+    sliders=sliders
+)
+
+fig.write_html("data/plotly2.html")
+return "data/plotly2.html"
+#+end_src
+
+#+attr_org: :width 800 :height 600
+#+RESULTS:
+[[file:data/plotly2.html]]
+
+
+* Gnuplot
+
+In the same buffer, you can have gnuplot scripts with python and any
+other programming language.
+
+#+begin_src gnuplot :file ./data/gnuplot-1.html
+reset
+load "~/.gnuplot"
+set terminal canvas mousing size 500,500
+
+plot sin(x), cos(x), tan(x), sin(x)+cos(x)
+
+#+end_src
+
+#+attr_org: :width 700 :height 600
+#+RESULTS:
+[[file:./data/gnuplot-1.html]]
+
+
+* Interactive P5js
+
+For instance you can use [[https://github.com/alejandrogallo/ob-p5js][alejandrogallo/ob-p5js: An org-babel plugin for p5js]]
+plugin to create interactive animations using javascript.
+
+Again, this is a mirror image of what is going on in the =org-mode= document!
+
+
+#+begin_src p5js :height 200 :center t :file ./data/something.html :results file raw replace value
+function setup() {
+  createCanvas(500, 200, WEBGL);
+}
+function draw() {
+  background(255);
+  push();
+  normalMaterial();
+  rotateZ(frameCount * 0.01);
+  rotateX(frameCount * 0.01);
+  rotateY(frameCount * 0.01);
+  box(100, sin(0.01*frameCount)*70, cos(0.05*frameCount)*70);
+  pop();
+}
+#+end_src
+
+#+attr_org: :width 500 :height 200
+#+RESULTS:
+[[file:data/something.html]]
+
+#+begin_src p5js :height 200 :center t :file ./data/wave.html :results file raw replace value
+let xspacing = 16; // Distance between each horizontal location
+let w; // Width of entire wave
+let theta = 0.0; // Start angle at 0
+let amplitude = 75.0; // Height of wave
+let period = 500.0; // How many pixels before the wave repeats
+let dx; // Value for incrementing x
+let yvalues; // Using an array to store height values for the wave
+let angleRotate = 0;
+
+function setup() {
+    createCanvas(710, 200);
+    w = width + 16;
+    dx = (TWO_PI / period) * xspacing;
+    yvalues = new Array(floor(w / xspacing));
+}
+
+function draw() {
+    background(255);
+    calcWave();
+    renderWave();
+}
+
+function calcWave() {
+    // Increment theta (try different values for
+    // 'angular velocity' here)
+    theta += 0.02 * mouseX / 150;
+
+    // For every x value, calculate a y value with sine function
+    let x = theta;
+    for (let i = 0; i < yvalues.length; i++) {
+        yvalues[i] = sin(x) * amplitude * (1 - mouseY / height);
+        x += dx;
+    }
+}
+
+function renderWave() {
+    noStroke();
+    fill(0);
+    // A simple way to draw the wave with an ellipse at each location
+    for (let x = 0; x < yvalues.length; x++)
+        ellipse(x * xspacing, height / 2 + yvalues[x], 16, 16);
+}
+#+end_src
+
+#+attr_org: :width 750 :height 250
+#+RESULTS:
+[[file:data/wave.html]]
+
+
+
+
+#+begin_src p5js :height 200 :center t :file ./data/mouse-1.html :results file raw replace value
+function setup() {
+  createCanvas(720, 400);
+  noStroke();
+  rectMode(CENTER);
+}
+
+function draw() {
+  background(230);
+  fill(244, 122, 158);
+  rect(mouseX, height / 2, mouseY / 2 + 10, mouseY / 2 + 10);
+  fill(237, 34, 93);
+  let inverseX = width - mouseX;
+  let inverseY = height - mouseY;
+  rect(inverseX, height / 2, inverseY / 2 + 10, inverseY / 2 + 10);
+}
+#+end_src
+
+#+attr_org: :width 800 :height 450
+#+RESULTS:
+[[file:data/mouse-1.html]]
+
+
+#+begin_src p5js :height 200 :center t :file ./data/mouse-2.html :results file raw replace value
+function setup() {
+  createCanvas(710, 400, WEBGL);
+}
+
+function draw() {
+  background(250);
+  rotateY(frameCount * 0.01);
+
+  for (let j = 0; j < 5; j++) {
+    push();
+    for (let i = 0; i < 80; i++) {
+      translate(
+        sin(frameCount * 0.001 + j) * 100,
+        sin(frameCount * 0.001 + j) * 100,
+        i * 0.1
+      );
+      rotateZ(frameCount * 0.002);
+      push();
+      sphere(8, 6, 4);
+      pop();
+    }
+    pop();
+  }
+}
+#+end_src
+
+#+attr_org: :width 800 :height 450
+#+RESULTS:
+[[file:data/mouse-2.html]]
+
+
+
