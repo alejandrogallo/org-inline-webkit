@@ -1,5 +1,7 @@
 * ORG-INLINE-WEBKIT
 
+THIS PACKAGE IS IN DEVELOPMENT, DO NOT USE, DO HACK.
+
 Take a look at [[https://alejandrogallo.github.io/org-inline-webkit/][the demo]].
 Now consider, this can be mirrored to the org-mode buffer.
 
