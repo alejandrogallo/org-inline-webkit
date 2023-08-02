@@ -1,4 +1,18 @@
+;;; org-inline-webkit.el --- Create and manage webkit xwidgets in org buffers
+
+;; SPDX-License-Identifier: MIT
+;; Author: Alejandro Gallo <aamsgallo@gmail.com>
+;; Version: 1.0
+;; Package-Requires: ((emacs "26.1"))
+;; Keywords: javascript, graphics, multimedia, p5js, xwidgets
+;; URL: https://github.com/alejandrogallo/org-inline-webkit
+
+;;; Commentary:
+
+;; This package provides ... TODO
+
 (require 'xwidget)
+(require 'cl-lib)
 
 (defgroup org-inline-webkit nil
   "Inline webkit blocks for org-mode"
@@ -18,6 +32,13 @@
                       ".html"))))))
   "The regex TODO"
   :type 'regex
+  :group 'org-inline-webkit)
+
+(defcustom org-inline-webkit-export-iframe
+  nil
+  "Wether to export org-inline-webkit elements as contained in an <iframe> tag
+for the html exporter."
+  :type 'boolean
   :group 'org-inline-webkit)
 
 (defun org-inline-webkit--get-xwidget-or-create (path)
@@ -153,15 +174,16 @@ This also kills the webkit proces in addition to removing it."
 
 
 (defun org-inline-webkit-export-iframe-p ()
-  (save-excursion
-    (beginning-of-buffer)
-    (re-search-forward (rx bol
-                           "#+ORG_INLINE_WEBKIT_EXPORT_IFRAME:"
-                           (0+ (any " "))
-                           "t"
-                           (0+ (any " "))
-                           eol)
-                       nil t)))
+  (or org-inline-webkit-export-iframe
+      (save-excursion
+        (beginning-of-buffer)
+        (re-search-forward (rx bol
+                               "#+ORG_INLINE_WEBKIT_EXPORT_IFRAME:"
+                               (0+ (any " "))
+                               "t"
+                               (0+ (any " "))
+                               eol)
+                           nil t))))
 
 (advice-add
  'org-html-link
@@ -183,3 +205,4 @@ This also kills the webkit proces in addition to removing it."
 
 
 (provide 'org-inline-webkit)
+;;; org-inline-webkit.el ends here
